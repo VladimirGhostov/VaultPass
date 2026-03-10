@@ -7,7 +7,8 @@
         WindowStyle="ToolWindow"
         ResizeMode="NoResize"
         Background="#FFF0F0"
-        FontFamily="Segoe UI">
+        FontFamily="Segoe UI"
+        Icon="/Assets/icon.ico">
 
     <Grid Margin="20">
         <Grid.RowDefinitions>

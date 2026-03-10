@@ -6,14 +6,18 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>Assets\icon.ico</ApplicationIcon>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Assets\icon.ico" />
     <None Remove="Cursors\cursor.cur" />
     <None Remove="Fonts\Comic Sans MS Pixel.ttf" />
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Assets\icon.ico" />
     <Resource Include="Cursors\cursor.cur" />
     <Resource Include="images\your-background.png" />
   </ItemGroup>

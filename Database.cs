@@ -1,25 +1,36 @@
 ﻿using System;
-using System.IO;
 using System.Data;
 using System.Data.SQLite;
 using System.Windows;
+using System.IO;
 
 namespace VaultPass
 {
     public static class Database
     {
-        private static string connectionString = "Data Source=vaultpass.db;Version=3;";
+        private static string? connectionString;
+        private static SQLiteConnection? connection;
 
-        // Подключение к базе данных
         public static void Connect()
         {
             try
             {
-                using (var connection = new SQLiteConnection(connectionString))
-                {
-                    connection.Open();
-                    CreateTable(connection);
-                }
+                // Используем папку Documents (там точно есть права на запись)
+                string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                string appFolder = Path.Combine(documentsPath, "VaultPass");
+
+                // Создаём папку, если её нет
+                Directory.CreateDirectory(appFolder);
+
+                // Путь к базе данных
+                string dbPath = Path.Combine(appFolder, "vaultpass.db");
+
+                // Формируем строку подключения
+                connectionString = $"Data Source={dbPath};Version=3;";
+
+                connection = new SQLiteConnection(connectionString);
+                connection.Open();
+                CreateTable();
             }
             catch (Exception ex)
             {
@@ -27,8 +38,7 @@ namespace VaultPass
             }
         }
 
-        // Создание таблицы
-        private static void CreateTable(SQLiteConnection connection)
+        private static void CreateTable()
         {
             string query = @"CREATE TABLE IF NOT EXISTS passwords (
                             id TEXT PRIMARY KEY,
@@ -41,14 +51,21 @@ namespace VaultPass
             }
         }
 
-        // Добавление записи
+        public static void Close()
+        {
+            if (connection != null && connection.State == ConnectionState.Open)
+            {
+                connection.Close();
+            }
+        }
+
         public static void InsertData(string id, string login, string password)
         {
-            using (var connection = new SQLiteConnection(connectionString))
+            using (var conn = new SQLiteConnection(connectionString))
             {
-                connection.Open();
+                conn.Open();
                 string query = "INSERT INTO passwords (id, login, password) VALUES (@id, @login, @password)";
-                using (var command = new SQLiteCommand(query, connection))
+                using (var command = new SQLiteCommand(query, conn))
                 {
                     command.Parameters.AddWithValue("@id", id);
                     command.Parameters.AddWithValue("@login", login);
@@ -58,71 +75,48 @@ namespace VaultPass
             }
         }
 
-        // Чтение всех данных
         public static DataTable ReadData()
         {
             DataTable dataTable = new DataTable();
-            try
+            using (var conn = new SQLiteConnection(connectionString))
             {
-                using (var connection = new SQLiteConnection(connectionString))
+                conn.Open();
+                string query = "SELECT id, login, password FROM passwords";
+                using (var adapter = new SQLiteDataAdapter(query, conn))
                 {
-                    connection.Open();
-                    string query = "SELECT id, login, password FROM passwords";
-                    using (var adapter = new SQLiteDataAdapter(query, connection))
-                    {
-                        adapter.Fill(dataTable);
-                    }
+                    adapter.Fill(dataTable);
                 }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ошибка при чтении: {ex.Message}");
             }
             return dataTable;
         }
 
-        public static void UpdateData(string id, string newLogin, string newPassword)
+        public static void DeleteData(string value)
         {
-            try
+            using (var conn = new SQLiteConnection(connectionString))
             {
-                using (var connection = new SQLiteConnection(connectionString))
+                conn.Open();
+                string query = "DELETE FROM passwords WHERE id = @value OR login = @value OR password = @value";
+                using (var command = new SQLiteCommand(query, conn))
                 {
-                    connection.Open();
-                    string query = "UPDATE passwords SET login = @login, password = @password WHERE id = @id";
-                    using (var command = new SQLiteCommand(query, connection))
-                    {
-                        command.Parameters.AddWithValue("@id", id);
-                        command.Parameters.AddWithValue("@login", newLogin);
-                        command.Parameters.AddWithValue("@password", newPassword);
-                        command.ExecuteNonQuery();
-                    }
+                    command.Parameters.AddWithValue("@value", value);
+                    command.ExecuteNonQuery();
                 }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ошибка при обновлении: {ex.Message}");
             }
         }
 
-        // Удаление записи
-        public static void DeleteData(string value)
+        public static void UpdateData(string id, string newLogin, string newPassword)
         {
-            try
+            using (var conn = new SQLiteConnection(connectionString))
             {
-                using (var connection = new SQLiteConnection(connectionString))
+                conn.Open();
+                string query = "UPDATE passwords SET login = @login, password = @password WHERE id = @id";
+                using (var command = new SQLiteCommand(query, conn))
                 {
-                    connection.Open();
-                    string query = "DELETE FROM passwords WHERE id = @value OR login = @value OR password = @value";
-                    using (var command = new SQLiteCommand(query, connection))
-                    {
-                        command.Parameters.AddWithValue("@value", value);
-                        command.ExecuteNonQuery();
-                    }
+                    command.Parameters.AddWithValue("@id", id);
+                    command.Parameters.AddWithValue("@login", newLogin);
+                    command.Parameters.AddWithValue("@password", newPassword);
+                    command.ExecuteNonQuery();
                 }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ошибка при удалении: {ex.Message}");
             }
         }
 
@@ -130,10 +124,10 @@ namespace VaultPass
         {
             try
             {
-                // Путь к текущей базе данных
-                string sourcePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "vaultpass.db");
+                string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                string appFolder = Path.Combine(documentsPath, "VaultPass");
+                string sourcePath = Path.Combine(appFolder, "vaultpass.db");
 
-                // Если файл существует - копируем
                 if (File.Exists(sourcePath))
                 {
                     File.Copy(sourcePath, destinationPath, true);
@@ -149,18 +143,16 @@ namespace VaultPass
             }
         }
 
-        // Восстановление из бэкапа
         public static void RestoreDatabase(string sourcePath)
         {
             try
             {
-                // Путь к текущей базе данных
-                string destinationPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "vaultpass.db");
+                string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                string appFolder = Path.Combine(documentsPath, "VaultPass");
+                string destinationPath = Path.Combine(appFolder, "vaultpass.db");
 
-                // Закрываем соединение перед копированием
                 Close();
 
-                // Если файл существует - заменяем
                 if (File.Exists(sourcePath))
                 {
                     File.Copy(sourcePath, destinationPath, true);
@@ -174,12 +166,6 @@ namespace VaultPass
             {
                 throw new Exception($"Ошибка при восстановлении: {ex.Message}");
             }
-        }
-
-        // Закрывать отдельно теперь не нужно, так как using сам закрывает соединение
-        public static void Close()
-        {
-            // Метод оставлен для совместимости, но ничего не делает
         }
     }
 }

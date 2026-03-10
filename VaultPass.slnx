@@ -1,3 +1,12 @@
 <Solution>
-  <Project Path="VaultPass.csproj" />
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+  </Configurations>
+  <Project Path="../VaultPassSetup/VaultPassSetup.vdproj" Type="Installer">
+    <Build Solution="*|x64" />
+  </Project>
+  <Project Path="VaultPass.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
 </Solution>
