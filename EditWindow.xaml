@@ -1,0 +1,80 @@
+﻿<Window x:Class="VaultPass.EditWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Редактирование записи" 
+        Height="348" Width="400"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="ToolWindow"
+        ResizeMode="NoResize"
+        Background="#FFF0F0"
+        FontFamily="Segoe UI">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Заголовок -->
+        <TextBlock Text="Редактирование записи" 
+                   Grid.Row="0" Grid.ColumnSpan="2"
+                   FontSize="20" 
+                   FontWeight="Bold" 
+                   Foreground="#FF1493"
+                   HorizontalAlignment="Center"
+                   Margin="0,0,0,20"/>
+
+        <!-- ID -->
+        <Label Content="ID:" Grid.Row="1" Grid.Column="0" 
+               FontSize="14" FontWeight="SemiBold" 
+               VerticalAlignment="Center" Margin="5"/>
+        <TextBox x:Name="EditId" Grid.Row="1" Grid.Column="1" 
+                 Margin="5" Padding="8" FontSize="14"
+                 Background="#FFF5F5" BorderBrush="#FFB6C1" BorderThickness="2"
+                 IsEnabled="False"/>
+        <!-- ID нельзя менять, чтобы не нарушить уникальность -->
+
+        <!-- Логин -->
+        <Label Content="Логин:" Grid.Row="2" Grid.Column="0" 
+               FontSize="14" FontWeight="SemiBold" 
+               VerticalAlignment="Center" Margin="5"/>
+        <TextBox x:Name="EditLogin" Grid.Row="2" Grid.Column="1" 
+                 Margin="5" Padding="8" FontSize="14"
+                 Background="#FFF5F5" BorderBrush="#FFB6C1" BorderThickness="2"/>
+
+        <!-- Пароль -->
+        <Label Content="Пароль:" Grid.Row="3" Grid.Column="0" 
+               FontSize="14" FontWeight="SemiBold" 
+               VerticalAlignment="Center" Margin="5"/>
+        <TextBox x:Name="EditPassword" Grid.Row="3" Grid.Column="1" 
+                 Margin="5" Padding="8" FontSize="14"
+                 Background="#FFF5F5" BorderBrush="#FFB6C1" BorderThickness="2"/>
+
+        <!-- Кнопки -->
+        <StackPanel Grid.Row="4" Grid.ColumnSpan="2" 
+                    Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
+
+            <Button x:Name="BtnSave" Content="💾 Сохранить" 
+                    Width="120" Height="35"
+                    Background="#FFB6C1" Foreground="#4A2C2C" 
+                    BorderBrush="#FF69B4" BorderThickness="2"
+                    FontSize="14" FontWeight="Bold"
+                    Click="BtnSave_Click"/>
+
+            <Button x:Name="BtnCancel" Content="❌ Отмена" 
+                    Width="120" Height="35" Margin="5"
+                    Background="#FFA07A" Foreground="#4A2C2C" 
+                    BorderBrush="#CD5C5C" BorderThickness="2"
+                    FontSize="14" FontWeight="Bold"
+                    Click="BtnCancel_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>
